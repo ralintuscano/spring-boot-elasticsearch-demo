@@ -1,0 +1,52 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: spring-boot-kafka-elasticsearch
+  cloud:
+    function:
+      definition: sink;dump;uppercase
+    stream:
+#      kafka:
+#        binder:
+#          default-broker-port: 9097
+#          brokers: localhost
+      kafka:
+        binder:
+          default-broker-port: 9092
+          brokers: cp6jl5evd5pm5ndta4jg.any.us-east-1.mpx.prd.cloud.redpanda.com:9092
+          configuration:
+            security:
+              protocol:
+                SASL_SSL
+            sasl:
+              mechanism: SCRAM-SHA-256
+              security:
+                protocol: SASL_SSL
+              jaas:
+                config: org.apache.kafka.common.security.scram.ScramLoginModule required username="service-role-1" password="4asbWe0FZn8o29bFGRzKZklljI0yXe";
+          jaas:
+            loginModule: org.apache.kafka.common.security.scram.ScramLoginModule
+
+      bindings:
+        sink-in-0:
+          destination: sink
+          group: sink-group
+        dump-in-0:
+          destination: dump
+          group: dump-group
+        uppercase-in-0:
+          destination: uppercase
+          group: uppercase-group
+        uppercase-out-0:
+          destination: uppercase-post
+          group: uppercase-group
+  elasticsearch:
+    uris: http://localhost:9200
+
+#  logging:
+#    level:
+#      org:
+#          cloud: DEBUG
+#          integration: DEBUG
