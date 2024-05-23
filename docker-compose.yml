@@ -6,6 +6,8 @@ services:
     image: wurstmeister/zookeeper:latest
     ports:
       - "2181:2181"
+    environment:
+      - KAFKA_ADVERTISED_HOST_NAME=zookeeper
     networks:
       - kafka-net
 
@@ -34,7 +36,7 @@ services:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
     ports:
-      - 8080:8080
+      - 8082:8080
     depends_on:
       - kafka
     environment:
@@ -50,6 +52,33 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    hostname: schema-registry
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-broker-1:9092,PLAINTEXT_INTERNAL://localhost:19092
+      SCHEMA_REGISTRY_DEBUG: 'true'
+    networks:
+      - kafka-net
+  schema-registry-ui:
+    image: landoop/schema-registry-ui:latest
+    container_name: kafka-schema-registry-ui
+    depends_on:
+      - schema-registry
+    ports:
+      - "8001:8000"
+    environment:
+      SCHEMAREGISTRY_URL: http://schema-registry:8081
+      PROXY: "true"
+    networks:
+      - kafka-net
 
 networks:
   kafka-net:

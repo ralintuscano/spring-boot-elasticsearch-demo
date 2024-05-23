@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8085
 
 spring:
   application:
@@ -8,27 +8,7 @@ spring:
     function:
       definition: sink;dump;uppercase
     stream:
-#      kafka:
-#        binder:
-#          default-broker-port: 9097
-#          brokers: localhost
-      kafka:
-        binder:
-          default-broker-port: 9092
-          brokers: cp6jl5evd5pm5ndta4jg.any.us-east-1.mpx.prd.cloud.redpanda.com:9092
-          configuration:
-            security:
-              protocol:
-                SASL_SSL
-            sasl:
-              mechanism: SCRAM-SHA-256
-              security:
-                protocol: SASL_SSL
-              jaas:
-                config: org.apache.kafka.common.security.scram.ScramLoginModule required username="service-role-1" password="4asbWe0FZn8o29bFGRzKZklljI0yXe";
-          jaas:
-            loginModule: org.apache.kafka.common.security.scram.ScramLoginModule
-
+      default-binder: kafka2
       bindings:
         sink-in-0:
           destination: sink
@@ -42,6 +22,40 @@ spring:
         uppercase-out-0:
           destination: uppercase-post
           group: uppercase-group
+      binders:
+        kafka1:
+          type: kafka
+          environment:
+            spring:
+              cloud:
+                stream:
+                  kafka:
+                    binder:
+                      default-broker-port: 9092
+                      brokers: cp6jl5evd5pm5ndta4jg.any.us-east-1.mpx.prd.cloud.redpanda.com:9092
+                      configuration:
+                        security:
+                          protocol:
+                            SASL_SSL
+                        sasl:
+                          mechanism: SCRAM-SHA-256
+                          security:
+                            protocol: SASL_SSL
+                          jaas:
+                            config: org.apache.kafka.common.security.scram.ScramLoginModule required username="service-role-1" password="4asbWe0FZn8o29bFGRzKZklljI0yXe";
+                      jaas:
+                        loginModule: org.apache.kafka.common.security.scram.ScramLoginModule
+        kafka2:
+          type: kafka
+          environment:
+            spring:
+              cloud:
+                stream:
+                  kafka:
+                    binder:
+                      default-broker-port: 9092
+                      brokers: localhost:9097
+
   elasticsearch:
     uris: http://localhost:9200
 
